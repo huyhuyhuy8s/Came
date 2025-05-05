@@ -24,6 +24,11 @@ export function UserMenu() {
   const { user, logout } = useUser()
   const [profileOpen, setProfileOpen] = useState(false)
 
+  const handleLogout = async () => {
+    await logout()
+    router.push("/") // Redirect to home page after logout
+  }
+
   if (!user) {
     return (
       <div className="flex items-center gap-4">
@@ -69,7 +74,7 @@ export function UserMenu() {
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => logout()}>
+          <DropdownMenuItem onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
             <span>Log out</span>
           </DropdownMenuItem>

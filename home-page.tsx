@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import Image from "next/image"
-import { ShoppingCart } from "lucide-react"
+import Link from "next/link";
+import Image from "next/image";
+import { ShoppingCart } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
-import { useRouter } from "next/navigation"
-import { UserMenu } from "@/components/user-menu"
-import { useCart } from "@/context/cart-context"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { useRouter } from "next/navigation";
+import { UserMenu } from "@/components/user-menu";
+import { useCart } from "@/context/cart-context";
+import { Badge } from "@/components/ui/badge";
 
 export default function HomePage() {
-  const router = useRouter()
-  const { itemCount } = useCart()
+  const router = useRouter();
+  const { itemCount } = useCart();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -26,7 +26,7 @@ export default function HomePage() {
               Home
             </Link>
             <Link href="/menu" className="text-sm font-medium">
-              Menu
+              Menu {/* This link points to the /menu route */}
             </Link>
             <Link href="/about" className="text-sm font-medium">
               About us
@@ -79,7 +79,9 @@ export default function HomePage() {
           {/* Right side - Call to action */}
           <div className="flex items-center justify-center p-8 md:p-16">
             <div className="max-w-md space-y-6">
-              <h1 className="text-3xl font-bold md:text-4xl lg:text-5xl">Skip the line when you order online.</h1>
+              <h1 className="text-3xl font-bold md:text-4xl lg:text-5xl">
+                Skip the line when you order online.
+              </h1>
               <Button
                 className="rounded-full bg-slate-800 px-8 py-6 text-white hover:bg-slate-700"
                 onClick={() => router.push("/menu")}
@@ -107,7 +109,9 @@ export default function HomePage() {
                   placeholder="Email"
                   className="rounded-r-none border-gray-700 bg-transparent text-white focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
-                <Button className="rounded-l-none border border-l-0 border-gray-700">Sign Up</Button>
+                <Button className="rounded-l-none border border-l-0 border-gray-700">
+                  Sign Up
+                </Button>
               </div>
             </div>
           </div>
@@ -125,5 +129,5 @@ export default function HomePage() {
         </div>
       </footer>
     </div>
-  )
+  );
 }

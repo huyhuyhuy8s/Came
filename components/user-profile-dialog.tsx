@@ -1,11 +1,11 @@
-"use client";
+"use client"
 
-import { useEffect } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useEffect } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -13,18 +13,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { toast } from "@/components/use-toast";
-import { useUser } from "@/context/user-context";
+} from "@/components/ui/dialog"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { toast } from "@/components/use-toast" // Corrected import path
+import { useUser } from "@/context/user-context"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -33,18 +26,15 @@ const formSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
-});
+})
 
 interface UserProfileDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
-export function UserProfileDialog({
-  open,
-  onOpenChange,
-}: UserProfileDialogProps) {
-  const { user, updateUser } = useUser();
+export function UserProfileDialog({ open, onOpenChange }: UserProfileDialogProps) {
+  const { user, updateUser } = useUser()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,7 +42,7 @@ export function UserProfileDialog({
       name: user?.name || "",
       email: user?.email || "",
     },
-  });
+  })
 
   // Update form values when user changes
   useEffect(() => {
@@ -60,31 +50,31 @@ export function UserProfileDialog({
       form.reset({
         name: user.name,
         email: user.email,
-      });
+      })
     }
-  }, [user, form, open]);
+  }, [user, form, open])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!user) return;
+    if (!user) return
 
     try {
       updateUser({
         name: values.name,
         email: values.email,
-      });
+      })
 
       toast({
         title: "Profile updated",
         description: "Your profile has been updated successfully.",
-      });
+      })
 
-      onOpenChange(false);
+      onOpenChange(false)
     } catch (error) {
       toast({
         title: "Update failed",
         description: "An error occurred while updating your profile.",
         variant: "destructive",
-      });
+      })
     }
   }
 
@@ -93,15 +83,10 @@ export function UserProfileDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Edit profile</DialogTitle>
-          <DialogDescription>
-            Make changes to your profile here. Click save when you're done.
-          </DialogDescription>
+          <DialogDescription>Make changes to your profile here. Click save when you're done.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 py-4"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
             <FormField
               control={form.control}
               name="name"
@@ -135,5 +120,5 @@ export function UserProfileDialog({
         </Form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

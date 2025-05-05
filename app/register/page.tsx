@@ -6,12 +6,12 @@ import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { Loader2 } from "lucide-react"
+import { Loader2, Home } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { toast } from "@/components/use-toast"
+import { toast } from "@/components/ui/use-toast"
 import { useUser } from "@/context/user-context"
 
 const formSchema = z
@@ -53,7 +53,7 @@ export default function RegisterPage() {
     setIsLoading(true)
 
     try {
-      const success = await register(values.email, values.name, values.password)
+      const { success, error } = await register(values.email, values.name, values.password)
 
       if (success) {
         toast({
@@ -61,14 +61,12 @@ export default function RegisterPage() {
           description: "Your account has been created successfully.",
         })
 
-        // Redirect to home page after successful registration
-        setTimeout(() => {
-          router.push("/")
-        }, 1500)
+        // Redirect to home page immediately after successful registration
+        router.push("/")
       } else {
         toast({
           title: "Registration failed",
-          description: "An account with this email already exists.",
+          description: error || "An account with this email already exists.",
           variant: "destructive",
         })
       }
@@ -85,6 +83,14 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      {/* Home button */}
+      <div className="absolute left-4 top-4">
+        <Button variant="ghost" size="icon" onClick={() => router.push("/")} className="rounded-full">
+          <Home className="h-5 w-5" />
+          <span className="sr-only">Return to home</span>
+        </Button>
+      </div>
+
       <div className="flex min-h-screen flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight">Create your account</h2>

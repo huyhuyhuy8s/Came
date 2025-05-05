@@ -6,10 +6,9 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, Home } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -19,7 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/components/use-toast";
+import { toast } from "@/hooks/use-toast"; // Corrected import path
 import { useUser } from "@/context/user-context";
 
 const formSchema = z.object({
@@ -29,12 +28,11 @@ const formSchema = z.object({
   password: z.string().min(1, {
     message: "Password is required.",
   }),
-  rememberMe: z.boolean().default(false),
 });
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, users } = useUser();
+  const { login } = useUser();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -42,7 +40,6 @@ export default function LoginPage() {
     defaultValues: {
       email: "",
       password: "",
-      rememberMe: false,
     },
   });
 
@@ -50,22 +47,20 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const success = await login(values.email, values.password);
+      const { success, error } = await login(values.email, values.password);
 
       if (success) {
         toast({
           title: "Login successful",
-          description: "You have been logged in successfully.",
+          description: "Welcome back!",
         });
 
-        // Redirect to home page after successful login
-        setTimeout(() => {
-          router.push("/");
-        }, 1500);
+        // Redirect to home page immediately after successful login
+        router.push("/");
       } else {
         toast({
           title: "Login failed",
-          description: "Invalid email or password.",
+          description: error || "Invalid email or password.",
           variant: "destructive",
         });
       }
@@ -82,16 +77,24 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      {/* Home button */}
+      <div className="absolute left-4 top-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.push("/")}
+          className="rounded-full"
+        >
+          <Home className="h-5 w-5" />
+          <span className="sr-only">Return to home</span>
+        </Button>
+      </div>
+
       <div className="flex min-h-screen flex-1 flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight">
             Sign in to your account
           </h2>
-          {users.length > 0 && (
-            <div className="mt-4 text-center text-sm text-muted-foreground">
-              Available test accounts: {users.map((u) => u.email).join(", ")}
-            </div>
-          )}
         </div>
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
@@ -115,36 +118,15 @@ export default function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <div className="flex items-center justify-between">
-                      <FormLabel>Password</FormLabel>
-                      <Link
-                        href="/forgot-password"
-                        className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-                      >
-                        Forgot password?
-                      </Link>
-                    </div>
+                    <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="rememberMe"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        {...field}
                       />
                     </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Remember me</FormLabel>
-                    </div>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -162,12 +144,12 @@ export default function LoginPage() {
           </Form>
 
           <p className="mt-10 text-center text-sm text-muted-foreground">
-            Not a member?{" "}
+            Don't have an account?{" "}
             <Link
               href="/register"
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
-              Create an account
+              Sign up
             </Link>
           </p>
         </div>

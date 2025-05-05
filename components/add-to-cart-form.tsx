@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "@/context/cart-context";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast"; // Corrected import path
+import { supabase } from "@/lib/supabase"; // Ensure this path is correct
 
 interface AddToCartFormProps {
   product: any;
@@ -14,12 +15,39 @@ interface AddToCartFormProps {
   options: any[];
 }
 
-export function AddToCartForm({ product, sizes, options }: AddToCartFormProps) {
+export function AddToCartForm({
+  product,
+  sizes: initialSizes,
+  options: initialOptions,
+}: AddToCartFormProps) {
+  const [sizes, setSizes] = useState(initialSizes);
+  const [options, setOptions] = useState(initialOptions);
+
+  useEffect(() => {
+    async function fetchProductDetails() {
+      try {
+        const { data: productSizes, error: sizeError } = await supabase
+          .from("product_sizes")
+          .select("*");
+        if (sizeError) throw sizeError;
+
+        const { data: productOptions, error: optionsError } = await supabase
+          .from("product_options")
+          .select("*");
+        if (optionsError) throw optionsError;
+
+        setSizes(productSizes);
+        setOptions(productOptions);
+      } catch (error) {
+        console.error("Error fetching product details:", error.message);
+      }
+    }
+
+    fetchProductDetails();
+  }, []);
+
   const { addItem } = useCart();
-  const [selectedSize, setSelectedSize] = useState(
-    // Use optional chaining and nullish coalescing for safer access
-    sizes?.[0]?.value ?? ""
-  );
+  const [selectedSize, setSelectedSize] = useState(sizes?.[0]?.value ?? "");
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [quantity, setQuantity] = useState(1);
 

@@ -1,5 +1,5 @@
-import CartPage from "../../cart-page"
+import CartPageEnhanced from "../../cart-page-enhanced";
 
 export default function Page() {
-  return <CartPage />
+  return <CartPageEnhanced />;
 }

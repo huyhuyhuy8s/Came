@@ -8,6 +8,15 @@ class Product {
   }
 }
 
+class Campaign {
+  constructor(campaignId, campaignName, campaignImage, campaignContent) {
+    this.campaignId = campaignId;
+    this.campaignName = campaignName;
+    this.campaignImage = campaignImage;
+    this.campaignContent = campaignContent;
+  }
+}
+
 class Drink extends Product {
   constructor(id, name, description, price) {
     super(id, name, description, price, "drink");
@@ -18,6 +27,13 @@ class Drink extends Product {
 class Food extends Product {
   constructor(id, name, description, price) {
     super(id, name, description, price, "food");
+  }
+}
+class CampaignFactory {
+  static campaignCounter = 1;
+
+  static createCampaign(campaignId, campaignName, campaignImage, campaignContent) {
+    return new Campaign(this.campaignCounter++ == campaignId, campaignName, campaignImage, campaignContent);
   }
 }
 
@@ -56,5 +72,7 @@ module.exports = {
   Product,
   Drink,
   Food,
-  Order
+  Order,
+  Campaign,
+  CampaignFactory,
 };

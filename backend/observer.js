@@ -29,7 +29,7 @@ class Observer {
   }
 }
 
-class CustomerNotification extends Observer {
+class Notification extends Observer {
   constructor(customer) {
     super();
     this.customer = customer;

@@ -7,7 +7,7 @@ Came is a modern web application for a Vietnamese coffee shop that allows custom
 
 ## Live Demo
 
-You can access the live application at: [https://came-6w45bpr8p-huyhuyhuy8s-projects.vercel.app](https://came-6w45bpr8p-huyhuyhuy8s-projects.vercel.app)
+You can access the live application at: [https://came-iota.vercel.app](https://came-iota.vercel.app)
 
 ## Features
 

@@ -1,21 +1,40 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, User } from 'lucide-react';
+import { ShoppingCart, User, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import CartCounter from './CartCounter';
 import MobileMenu from './MobileMenu';
 import { useAuth } from '@/hooks/useAuth';
+import NotificationDropdown from './NotificationDropdown';
 
 const Header: React.FC = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const { isAuthenticated, user } = useAuth();
 
   const isActive = (path: string) => {
     return location.pathname === path;
   };
+
+  // Close notification dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isNotificationOpen) {
+        const target = event.target as HTMLElement;
+        if (!target.closest('.notification-dropdown') && !target.closest('.notification-icon')) {
+          setIsNotificationOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isNotificationOpen]);
 
   return (
     <header className="border-b border-gray-200 py-4 bg-white sticky top-0 z-50">
@@ -58,10 +77,32 @@ const Header: React.FC = () => {
               Sign In
             </Link>
           )}
+          
+          {/* Notification Icon - Only visible when logged in */}
+          {isAuthenticated && (
+            <div className="relative notification-icon">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="relative"
+                onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+              >
+                <Bell className="h-5 w-5" />
+              </Button>
+              
+              {isNotificationOpen && (
+                <div className="absolute right-0 mt-2 w-80 notification-dropdown">
+                  <NotificationDropdown onClose={() => setIsNotificationOpen(false)} />
+                </div>
+              )}
+            </div>
+          )}
+          
           <Link to="/cart" className="relative">
             <ShoppingCart className="h-5 w-5" />
             <CartCounter />
           </Link>
+          
           <Link to="/account">
             <User className="h-5 w-5" />
           </Link>

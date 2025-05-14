@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getUserOrders, Order } from '@/services/orderService';
+import { getUserOrders, Order, getOrderFeedbackStatus } from '@/services/orderService';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,6 +13,8 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
+import { Star, CheckCircle } from 'lucide-react';
+import OrderFeedback from './OrderFeedback';
 
 const formatPrice = (price: number): string => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
@@ -41,6 +43,8 @@ const getStatusBadgeColor = (status: string) => {
 
 const OrderHistory: React.FC = () => {
   const { user } = useAuth();
+  const [feedbackOrderId, setFeedbackOrderId] = useState<string | null>(null);
+  const [orderFeedbackStatus, setOrderFeedbackStatus] = useState<Record<string, boolean>>({});
   
   const {
     data: orders = [],
@@ -52,6 +56,31 @@ const OrderHistory: React.FC = () => {
     queryFn: () => user ? getUserOrders(user.id) : Promise.resolve([]),
     enabled: !!user
   });
+  
+  // Check feedback status for completed orders
+  React.useEffect(() => {
+    const checkFeedbackStatus = async () => {
+      const completedOrders = orders.filter(order => order.status === 'completed');
+      if (completedOrders.length > 0) {
+        const feedbackStatuses: Record<string, boolean> = {};
+        
+        for (const order of completedOrders) {
+          try {
+            const hasFeedback = await getOrderFeedbackStatus(order.id);
+            feedbackStatuses[order.id] = hasFeedback;
+          } catch (error) {
+            console.error(`Error checking feedback for order ${order.id}:`, error);
+          }
+        }
+        
+        setOrderFeedbackStatus(feedbackStatuses);
+      }
+    };
+    
+    if (orders.length > 0) {
+      checkFeedbackStatus();
+    }
+  }, [orders]);
   
   if (isLoading) {
     return (
@@ -95,7 +124,7 @@ const OrderHistory: React.FC = () => {
               <TableHead>Date</TableHead>
               <TableHead>Total</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Action</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -113,18 +142,50 @@ const OrderHistory: React.FC = () => {
                     {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                   </span>
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-right space-x-2">
                   <Link to={`/order-tracking/${order.id}`}>
                     <Button variant="outline" size="sm">
                       Track Order
                     </Button>
                   </Link>
+                  
+                  {order.status === 'completed' && !orderFeedbackStatus[order.id] && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setFeedbackOrderId(order.id)}
+                      className="ml-2"
+                    >
+                      <Star className="h-4 w-4 mr-1" />
+                      Rate
+                    </Button>
+                  )}
+                  
+                  {order.status === 'completed' && orderFeedbackStatus[order.id] && (
+                    <span className="inline-flex items-center ml-2 text-xs text-green-600">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Rated
+                    </span>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
+      
+      {/* Feedback Dialog */}
+      {feedbackOrderId && (
+        <OrderFeedback
+          orderId={feedbackOrderId}
+          open={!!feedbackOrderId}
+          onClose={() => {
+            setFeedbackOrderId(null);
+            // Update feedback status and refetch orders
+            refetch();
+          }}
+        />
+      )}
     </div>
   );
 };

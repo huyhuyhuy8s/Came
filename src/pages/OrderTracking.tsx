@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, Clock, Truck, Package, Coffee, X } from 'lucide-react';
+import { CheckCircle, Clock, Truck, Package, Coffee, X, Star } from 'lucide-react';
 import * as orderService from '@/services/orderService';
 import { Order, OrderItem } from '@/services/orderService';
 import { Separator } from '@/components/ui/separator';
@@ -15,6 +15,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useAuth } from '@/hooks/useAuth';
+import OrderFeedback from '@/components/OrderFeedback';
 
 const statusSteps = [
   { status: 'pending', icon: Clock, label: 'Order Placed' },
@@ -32,9 +34,12 @@ const OrderTracking = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasFeedback, setHasFeedback] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
   
   const fetchOrderDetails = async () => {
     if (!orderId) return;
@@ -47,6 +52,12 @@ const OrderTracking = () => {
         setOrder(orderData);
         const items = await orderService.getOrderItems(orderId);
         setOrderItems(items);
+        
+        // Check if feedback exists for completed orders
+        if (orderData.status === 'completed') {
+          const feedbackExists = await orderService.getOrderFeedbackStatus(orderId);
+          setHasFeedback(feedbackExists);
+        }
       } else {
         toast({
           title: "Order not found",
@@ -116,6 +127,7 @@ const OrderTracking = () => {
   };
   
   const canCancel = order && CANCELLABLE_STATUSES.includes(order.status);
+  const canLeaveFeedback = order?.status === 'completed' && !hasFeedback;
   
   if (isLoading) {
     return (
@@ -162,6 +174,22 @@ const OrderTracking = () => {
           >
             <X size={16} className="mr-1" /> Cancel Order
           </Button>
+        )}
+        {canLeaveFeedback && (
+          <Button 
+            variant="outline" 
+            onClick={() => setFeedbackDialogOpen(true)}
+            className="ml-4"
+          >
+            <Star size={16} className="mr-1" /> Rate Order
+          </Button>
+        )}
+        {hasFeedback && (
+          <div className="px-4 py-2 bg-green-50 text-green-800 rounded-md">
+            <p className="font-medium flex items-center">
+              <CheckCircle size={16} className="mr-2" /> Feedback submitted
+            </p>
+          </div>
         )}
         {order.status === 'cancelled' && (
           <div className="px-4 py-2 bg-red-100 text-red-800 rounded-md">
@@ -332,6 +360,17 @@ const OrderTracking = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* Feedback Dialog */}
+      <OrderFeedback
+        orderId={orderId || ""}
+        open={feedbackDialogOpen}
+        onClose={() => {
+          setFeedbackDialogOpen(false);
+          // Refresh feedback status after closing
+          fetchOrderDetails();
+        }}
+      />
     </div>
   );
 };

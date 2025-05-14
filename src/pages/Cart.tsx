@@ -116,6 +116,8 @@ const Cart = () => {
         delivery_address: deliveryAddress,
         delivery_time: orderType === 'delivery' ? deliveryTime : orderType === 'takeaway' ? pickupTime : null,
         status: 'pending',
+        created_at: null, // Let the database set default value
+        updated_at: null, // Let the database set default value
       });
       
       // Add order items

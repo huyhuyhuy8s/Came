@@ -31,6 +31,20 @@ export interface ProductSize {
   price: number;
 }
 
+export interface IceOption {
+  id: string;
+  label: string;
+  value: string;
+  price_adjustment: number;
+}
+
+export interface SugarOption {
+  id: string;
+  label: string;
+  value: string;
+  price_adjustment: number;
+}
+
 // Get all products
 export const getProducts = async (): Promise<Product[]> => {
   const { data, error } = await supabase
@@ -115,6 +129,34 @@ export const getProductSizes = async (): Promise<ProductSize[]> => {
 
   if (error) {
     console.error('Error fetching product sizes:', error);
+    throw error;
+  }
+
+  return data || [];
+};
+
+// Get ice options
+export const getIceOptions = async (): Promise<IceOption[]> => {
+  const { data, error } = await supabase
+    .from('ice')
+    .select('*');
+
+  if (error) {
+    console.error('Error fetching ice options:', error);
+    throw error;
+  }
+
+  return data || [];
+};
+
+// Get sugar options
+export const getSugarOptions = async (): Promise<SugarOption[]> => {
+  const { data, error } = await supabase
+    .from('sugar')
+    .select('*');
+
+  if (error) {
+    console.error('Error fetching sugar options:', error);
     throw error;
   }
 

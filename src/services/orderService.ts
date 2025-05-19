@@ -28,6 +28,8 @@ export interface OrderItem {
   options: any[]; // Change to any[] to match expected type
   price: number;
   size: string | null;
+  selected_ice_id?: string | null;
+  selected_sugar_id?: string | null;
 }
 
 // Create order

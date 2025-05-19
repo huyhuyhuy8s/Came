@@ -169,11 +169,39 @@ export type Database = {
         }
         Relationships: []
       }
+      ice: {
+        Row: {
+          created_at: string
+          id: string
+          label: string | null
+          price_adjustment: number | null
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          price_adjustment?: number | null
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          price_adjustment?: number | null
+          updated_at?: string
+          value?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string | null
           id: string
           message: string
+          read: boolean | null
           type: string
           user_id: string | null
         }
@@ -181,6 +209,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           message: string
+          read?: boolean | null
           type: string
           user_id?: string | null
         }
@@ -188,6 +217,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           message?: string
+          read?: boolean | null
           type?: string
           user_id?: string | null
         }
@@ -197,6 +227,41 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_feedback: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          order_id: string
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          order_id: string
+          rating: number
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string
+          rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_feedback_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
@@ -408,6 +473,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sugar: {
+        Row: {
+          created_at: string
+          id: string
+          label: string | null
+          price_adjustment: number | null
+          updated_at: string
+          value: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          price_adjustment?: number | null
+          updated_at?: string
+          value?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          price_adjustment?: number | null
+          updated_at?: string
+          value?: string | null
+        }
+        Relationships: []
       }
       support_tickets: {
         Row: {

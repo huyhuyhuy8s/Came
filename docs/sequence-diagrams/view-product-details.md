@@ -28,12 +28,14 @@ sequenceDiagram
     
     UI->>QueryClient: getProductOptions()
     UI->>QueryClient: getProductSizes()
-    QueryClient-->>UI: Return options and sizes
-    UI-->>User: Display product details with options
+    UI->>QueryClient: getIceOptions()
+    UI->>QueryClient: getSugarOptions()
+    QueryClient-->>UI: Return options, sizes, ice, and sugar options
+    UI-->>User: Display product details with all options
     
-    User->>UI: Selects options, size, quantity
+    User->>UI: Selects options, size, ice, sugar, quantity
     User->>UI: Clicks "Add to Cart"
-    UI->>CartProvider: addItem(product with options)
+    UI->>CartProvider: addItem(product with all options)
     CartProvider-->>UI: Confirm item added
     UI-->>User: Show confirmation toast
 ```

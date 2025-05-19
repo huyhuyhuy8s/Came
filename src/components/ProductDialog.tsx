@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Minus, Plus } from 'lucide-react';
+import { Minus, Plus, Droplet, Candy } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -19,7 +19,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCart } from '@/hooks/useCart';
-import { Product, ProductOption, ProductSize, getProductOptions, getProductSizes } from '@/services/productService';
+import { 
+  Product,
+  ProductOption,
+  ProductSize,
+  getProductOptions,
+  getProductSizes,
+  getIceOptions,
+  getSugarOptions,
+  IceOption,
+  SugarOption,
+} from '@/services/productService';
 import { useQuery } from '@tanstack/react-query';
 
 interface ProductDialogProps {
@@ -43,6 +53,10 @@ const ProductDialog: React.FC<ProductDialogProps> = ({ product, open, onClose })
   const [selectedOptionObj, setSelectedOptionObj] = useState<ProductOption | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedSizeObj, setSelectedSizeObj] = useState<ProductSize | null>(null);
+  const [selectedIce, setSelectedIce] = useState<string | null>(null);
+  const [selectedIceObj, setSelectedIceObj] = useState<IceOption | null>(null);
+  const [selectedSugar, setSelectedSugar] = useState<string | null>(null);
+  const [selectedSugarObj, setSelectedSugarObj] = useState<SugarOption | null>(null);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   
   // Fetch product options and sizes using React Query
@@ -60,6 +74,22 @@ const ProductDialog: React.FC<ProductDialogProps> = ({ product, open, onClose })
   } = useQuery({
     queryKey: ['product-sizes'],
     queryFn: getProductSizes
+  });
+
+  const {
+    data: iceOptions = [],
+    isLoading: isLoadingIceOptions
+  } = useQuery({
+    queryKey: ['ice-options'],
+    queryFn: getIceOptions
+  });
+
+  const {
+    data: sugarOptions = [],
+    isLoading: isLoadingSugarOptions
+  } = useQuery({
+    queryKey: ['sugar-options'],
+    queryFn: getSugarOptions
   });
   
   // Reset state when dialog opens/closes or product changes
@@ -92,8 +122,26 @@ const ProductDialog: React.FC<ProductDialogProps> = ({ product, open, onClose })
         setSelectedSize(null);
         setSelectedSizeObj(null);
       }
+
+      // Set default ice option if available
+      if (iceOptions.length > 0) {
+        setSelectedIce(iceOptions[0].id);
+        setSelectedIceObj(iceOptions[0]);
+      } else {
+        setSelectedIce(null);
+        setSelectedIceObj(null);
+      }
+
+      // Set default sugar option if available
+      if (sugarOptions.length > 0) {
+        setSelectedSugar(sugarOptions[0].id);
+        setSelectedSugarObj(sugarOptions[0]);
+      } else {
+        setSelectedSugar(null);
+        setSelectedSugarObj(null);
+      }
     }
-  }, [open, product, options, sizes]);
+  }, [open, product, options, sizes, iceOptions, sugarOptions]);
   
   // Update selected option and size objects when selections change
   useEffect(() => {
@@ -110,15 +158,32 @@ const ProductDialog: React.FC<ProductDialogProps> = ({ product, open, onClose })
     } else {
       setSelectedSizeObj(null);
     }
-  }, [selectedOption, selectedSize, options, sizes]);
+
+    if (selectedIce) {
+      const ice = iceOptions.find(i => i.id === selectedIce);
+      setSelectedIceObj(ice || null);
+    } else {
+      setSelectedIceObj(null);
+    }
+
+    if (selectedSugar) {
+      const sugar = sugarOptions.find(s => s.id === selectedSugar);
+      setSelectedSugarObj(sugar || null);
+    } else {
+      setSelectedSugarObj(null);
+    }
+  }, [selectedOption, selectedSize, selectedIce, selectedSugar, options, sizes, iceOptions, sugarOptions]);
   
   if (!product) return null;
   
   // Calculate prices correctly
   const optionAdjustment = selectedOptionObj?.price_adjustment || 0;
+  const iceAdjustment = selectedIceObj?.price_adjustment || 0;
+  const sugarAdjustment = selectedSugarObj?.price_adjustment || 0;
   const basePrice = Number(product.price_min || 0);
   const sizePrice = selectedSizeObj?.price || 0;
-  const totalUnitPrice = basePrice + optionAdjustment;
+  
+  const totalUnitPrice = basePrice + optionAdjustment + iceAdjustment + sugarAdjustment;
   const totalPrice = totalUnitPrice * quantity;
   
   const handleAddToCart = () => {
@@ -144,8 +209,21 @@ const ProductDialog: React.FC<ProductDialogProps> = ({ product, open, onClose })
     setIsAddingToCart(true);
     
     try {
-      const selectedOptions = selectedOptionObj ? [selectedOptionObj.value] : [];
-      const finalPrice = basePrice + optionAdjustment + (selectedSizeObj?.price || 0);
+      const selectedOptions = [];
+      if (selectedOptionObj) {
+        selectedOptions.push(selectedOptionObj.value);
+      }
+      
+      // Add ice and sugar selections to the options array
+      if (selectedIceObj) {
+        selectedOptions.push(`Ice: ${selectedIceObj.value}`);
+      }
+      
+      if (selectedSugarObj) {
+        selectedOptions.push(`Sugar: ${selectedSugarObj.value}`);
+      }
+      
+      const finalPrice = basePrice + optionAdjustment + (selectedSizeObj?.price || 0) + iceAdjustment + sugarAdjustment;
       
       addItem({
         product_id: product.id,
@@ -187,8 +265,8 @@ const ProductDialog: React.FC<ProductDialogProps> = ({ product, open, onClose })
     setQuantity(quantity + 1);
   };
   
-  // Calculate display price that includes base price + size price + option adjustment
-  const displayPrice = basePrice + (selectedSizeObj?.price || 0) + optionAdjustment;
+  // Calculate display price that includes base price + size price + option adjustments
+  const displayPrice = basePrice + (selectedSizeObj?.price || 0) + optionAdjustment + iceAdjustment + sugarAdjustment;
   const displayTotalPrice = displayPrice * quantity;
   
   return (
@@ -235,7 +313,7 @@ const ProductDialog: React.FC<ProductDialogProps> = ({ product, open, onClose })
             </div>
           </div>
           
-          {isLoadingOptions || isLoadingSizes ? (
+          {isLoadingOptions || isLoadingSizes || isLoadingIceOptions || isLoadingSugarOptions ? (
             <div className="py-4 flex justify-center">
               <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-black"></div>
             </div>
@@ -276,6 +354,49 @@ const ProductDialog: React.FC<ProductDialogProps> = ({ product, open, onClose })
                   </Select>
                 </div>
               )}
+
+              {/* Ice and Sugar options side by side */}
+              <div className="grid grid-cols-2 gap-4">
+                {iceOptions.length > 0 && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <Droplet className="h-4 w-4" /> Ice
+                    </label>
+                    <Select value={selectedIce || ''} onValueChange={setSelectedIce}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select ice" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {iceOptions.map(ice => (
+                          <SelectItem key={ice.id} value={ice.id}>
+                            {ice.label} {ice.price_adjustment > 0 && `(+${formatPrice(ice.price_adjustment)})`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {sugarOptions.length > 0 && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <Candy className="h-4 w-4" /> Sugar
+                    </label>
+                    <Select value={selectedSugar || ''} onValueChange={setSelectedSugar}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select sugar" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sugarOptions.map(sugar => (
+                          <SelectItem key={sugar.id} value={sugar.id}>
+                            {sugar.label} {sugar.price_adjustment > 0 && `(+${formatPrice(sugar.price_adjustment)})`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>
@@ -284,7 +405,11 @@ const ProductDialog: React.FC<ProductDialogProps> = ({ product, open, onClose })
           <Button 
             onClick={handleAddToCart} 
             className="w-full bg-black hover:bg-gray-800 text-white"
-            disabled={isAddingToCart || (options.length > 0 && !selectedOption) || (sizes.length > 0 && !selectedSize)}
+            disabled={
+              isAddingToCart || 
+              (options.length > 0 && !selectedOption) || 
+              (sizes.length > 0 && !selectedSize)
+            }
           >
             {isAddingToCart ? (
               <div className="flex items-center gap-2">

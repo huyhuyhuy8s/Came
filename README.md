@@ -7,7 +7,7 @@ Came is a modern web application for a Vietnamese coffee shop that allows custom
 
 ## Live Demo
 
-You can access the live application at: [https://came-iota.vercel.app/](https://came-iota.vercel.app/)
+You can access the live application at: [https://came-6w45bpr8p-huyhuyhuy8s-projects.vercel.app](https://came-6w45bpr8p-huyhuyhuy8s-projects.vercel.app)
 
 ## Features
 
@@ -41,7 +41,7 @@ You can access the live application at: [https://came-iota.vercel.app/](https://
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/huyhuyhuy8s/Came.git
+git clone https://github.com/your-username/came.git
 cd came
 ```
 
@@ -108,4 +108,4 @@ This project is licensed under the MIT License.
 
 ## Made with Lovable
 
-This project was created with [Lovable](https://lovable.dev), an AI-powered web application development platform.
+This project was created with [Lovable](https://lovable.dev/projects/f5c657a0-b0c0-4408-bb36-c9486cb49582), an AI-powered web application development platform.

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@/services/authService";
 import { Json } from "@/integrations/supabase/types";
@@ -12,6 +13,8 @@ export interface CartItem {
   size: string | null;
   selected_option_id: string | null;
   selected_size_id: string | null;
+  selected_ice_id?: string | null;
+  selected_sugar_id?: string | null;
 }
 
 export interface Cart {

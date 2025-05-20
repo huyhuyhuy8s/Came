@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
@@ -31,10 +32,39 @@ const SignIn = () => {
     setIsSubmitting(true);
     
     try {
+      // First check if the email is confirmed
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      
+      // If we can't check the user, we'll try to sign in anyway
+      if (!userError && userData?.user?.email === email && !userData?.user?.email_confirmed_at) {
+        toast({
+          title: "Email not confirmed",
+          description: "Please check your email and confirm your account before signing in.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       await login(email, password);
       navigate('/');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
+      
+      // Check if the error is due to unconfirmed email
+      if (error.message?.includes('Email not confirmed')) {
+        toast({
+          title: "Email not confirmed",
+          description: "Please check your email and confirm your account before signing in.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Login failed",
+          description: error.message || "Invalid credentials",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }

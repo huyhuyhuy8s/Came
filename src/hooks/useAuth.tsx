@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as authService from '@/services/authService';
 import { useToast } from '@/hooks/use-toast';
@@ -70,13 +71,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
+      // First check if the email is confirmed
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (!data.user?.email_confirmed_at) {
+        throw new Error('Email not confirmed. Please check your email inbox and confirm your account before signing in.');
+      }
+
       const user = await authService.signIn(email, password);
       setUser(user);
       toast({
         title: 'Login successful',
         description: `Welcome back, ${user.name || user.email}!`,
       });
-      navigate('/');
     } catch (error: any) {
       toast({
         title: 'Login failed',
@@ -92,13 +106,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (email: string, password: string, username: string) => {
     setIsLoading(true);
     try {
-      const user = await authService.signUp(email, password, username);
-      setUser(user);
+      // Register the user but don't auto-login
+      await authService.signUp(email, password, username);
+      
       toast({
         title: 'Registration successful',
-        description: `Welcome to Came, ${username || email}!`,
+        description: `Welcome to Came, ${username || email}! Please check your email to confirm your account.`,
       });
-      navigate('/');
+      
+      // Don't set the user state here to prevent auto-login
+      
     } catch (error: any) {
       const errorMessage = error.message || 'Could not create account';
       toast({

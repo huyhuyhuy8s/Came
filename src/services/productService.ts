@@ -111,7 +111,8 @@ export const getCategories = async (): Promise<Category[]> => {
 export const getProductOptions = async (): Promise<ProductOption[]> => {
   const { data, error } = await supabase
     .from('product_options')
-    .select('*');
+    .select('*')
+    .order('price_adjustment', { ascending: true });
 
   if (error) {
     console.error('Error fetching product options:', error);
@@ -125,7 +126,8 @@ export const getProductOptions = async (): Promise<ProductOption[]> => {
 export const getProductSizes = async (): Promise<ProductSize[]> => {
   const { data, error } = await supabase
     .from('product_sizes')
-    .select('*');
+    .select('*')
+    .order('price', { ascending: true });
 
   if (error) {
     console.error('Error fetching product sizes:', error);
@@ -139,7 +141,8 @@ export const getProductSizes = async (): Promise<ProductSize[]> => {
 export const getIceOptions = async (): Promise<IceOption[]> => {
   const { data, error } = await supabase
     .from('ice')
-    .select('*');
+    .select('*')
+    .order('price_adjustment', { ascending: true });
 
   if (error) {
     console.error('Error fetching ice options:', error);
@@ -153,7 +156,8 @@ export const getIceOptions = async (): Promise<IceOption[]> => {
 export const getSugarOptions = async (): Promise<SugarOption[]> => {
   const { data, error } = await supabase
     .from('sugar')
-    .select('*');
+    .select('*')
+    .order('price_adjustment', { ascending: true });
 
   if (error) {
     console.error('Error fetching sugar options:', error);

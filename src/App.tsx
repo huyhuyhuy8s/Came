@@ -16,6 +16,7 @@ import OrderTracking from "@/pages/OrderTracking";
 import Account from "@/pages/Account";
 import Support from "@/pages/Support";
 import Campaign from "@/pages/Campaign";
+import SuccessPage from "@/pages/SuccessPage";
 import Layout from "@/components/Layout";
 import NotFound from "@/pages/NotFound";
 import { AuthProvider } from "@/hooks/useAuth";
@@ -44,6 +45,7 @@ const App = () => (
                 <Route path="/account" element={<Account />} />
                 <Route path="/support" element={<Support />} />
                 <Route path="/campaign/:id" element={<Campaign />} />
+                <Route path="/success" element={<SuccessPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Layout>
